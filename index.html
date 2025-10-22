@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akamai Technologies</title>
+    <script>
+        async function fetchData(cik) {
+            const response = await fetch(`https://data.sec.gov/api/xbrl/companyconcept/CIK${cik}/dei/EntityCommonStockSharesOutstanding.json`, {headers: {'User-Agent': 'Akamai Technologies Data Fetcher'}});
+            const data = await response.json();
+            const shares = data.units.shares.filter(share => share.fy > '2020' && typeof share.val === 'number');
+            const maxShare = shares.reduce((max, share) => share.val > max.val ? share : max);
+            const minShare = shares.reduce((min, share) => share.val < min.val ? share : min);
+            document.getElementById('share-entity-name').innerText = data.entityName;
+            document.getElementById('share-max-value').innerText = maxShare.val;
+            document.getElementById('share-max-fy').innerText = maxShare.fy;
+            document.getElementById('share-min-value').innerText = minShare.val;
+            document.getElementById('share-min-fy').innerText = minShare.fy;
+        }
+        window.onload = () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const cik = urlParams.get('CIK') || '0001086222';
+            fetchData(cik);
+        };
+    </script>
+</head>
+<body>
+    <h1 id='share-entity-name'>Akamai Technologies</h1>
+    <div>
+        <h2>Max Shares</h2>
+        <p>Value: <span id='share-max-value'></span></p>
+        <p>Fiscal Year: <span id='share-max-fy'></span></p>
+    </div>
+    <div>
+        <h2>Min Shares</h2>
+        <p>Value: <span id='share-min-value'></span></p>
+        <p>Fiscal Year: <span id='share-min-fy'></span></p>
+    </div>
+</body>
+</html>
